@@ -1,57 +1,44 @@
 require 'rack/reqorder/version'
 require 'active_support/inflector'
 require 'mongoid'
-require 'rack/reqorder/models/http_request'
-require 'rack/reqorder/models/http_response'
-
-Mongoid.load!("#{File.expand_path(File.dirname(__FILE__))}/mongoid.yml", :development)
 
 module Rack
   module Reqorder
-    class Test
-      include Rack::Reqorder::Models
+    class << self
+      attr_accessor :configuration
+    end
 
-      def initialize(app)
-        @app = app
-      end
+    def self.configure
+      self.configuration ||= Configuration.new
+      yield(configuration)
+    end
 
-      def call(environment)
-        #api_session = ApiSession.create(created_at: Time.now)
-        request = Rack::Request.new(environment)
-        #api_session.request
+    def self.boot!
+      self.configuration.validate!
 
-        HttpRequest.create(
-          path: request.path,
-          full_path: request.fullpath,
-          headers: extract_all_headers(request),
-          parameters: request.params,
-        )
+      Mongoid.load!(
+        self.configuration.mongoid_yml,
+        self.configuration.environment
+      )
+    end
 
-        status, headers, body = @app.call(request.env)
+    class Configuration
+      attr_accessor :mongoid_yml, :environment
 
-        response = Rack::Response.new(body, status, headers)
+      def validate!
+        if mongoid_yml.blank?
+          raise 'You need to setup mongoid.yml before using this gem'
+        end
 
-        HttpResponse.create(
-          headers: response.headers,
-          #body: response.body.first,
-          status: response.status.to_i
-        )
-
-        binding.pry
-
-        response.finish
-
-      end
-
-      def extract_all_headers(request)
-        Hash[
-          request.env.select{|k,v|
-            k.start_with? 'HTTP_'
-          }.map{|k,v|
-            [k.gsub('HTTP_','').upcase, v]
-          }
-        ]
+        if environment.blank?
+          puts 'rack-reqorder: No environment found, assuming development environment'
+          self.environment = :development
+        end
       end
     end
   end
 end
+
+require 'rack/reqorder/models/http_request'
+require 'rack/reqorder/models/http_response'
+require 'rack/reqorder/logger'
