@@ -1,37 +1,46 @@
-require "ohm"
-require 'ohm/contrib'
-require "rack/reqorder/version"
-require "rack/reqorder/models/http_request"
-require "rack/reqorder/models/http_response"
+require 'rack/reqorder/version'
+require 'active_support/inflector'
+require 'mongoid'
+require 'rack/reqorder/models/http_request'
+require 'rack/reqorder/models/http_response'
+
+Mongoid.load!("#{File.expand_path(File.dirname(__FILE__))}/mongoid.yml", :development)
 
 module Rack
   module Reqorder
     class Test
+      include Rack::Reqorder::Models
+
       def initialize(app)
         @app = app
       end
 
       def call(environment)
         #api_session = ApiSession.create(created_at: Time.now)
-        rack_req = Rack::Request.new(environment)
+        request = Rack::Request.new(environment)
         #api_session.request
-        binding.pry
+
         HttpRequest.create(
-          path: rack_req.path,
-          full_path: rack_req.fullpath,
-          headers: extract_all_headers(rack_req),
-          parameters: rack_req.params,
+          path: request.path,
+          full_path: request.fullpath,
+          headers: extract_all_headers(request),
+          parameters: request.params,
         )
 
-        binding.pry
-        puts environment
-        status, headers, body = @app.call(rack_req.env)
-        puts status
-        puts headers
+        status, headers, body = @app.call(request.env)
 
         response = Rack::Response.new(body, status, headers)
 
+        HttpResponse.create(
+          headers: response.headers,
+          #body: response.body.first,
+          status: response.status.to_i
+        )
+
+        binding.pry
+
         response.finish
+
       end
 
       def extract_all_headers(request)
