@@ -1,6 +1,6 @@
 # Rack::Reqorder
 
-Simple gem that records requests and responses and anayzes them. Uses redis.
+Simple gem that records requests and responses. Uses MongoDB.
 
 ## Installation
 
@@ -19,7 +19,19 @@ Or install it yourself as:
     $ gem install rack-reqorder
 
 ## Usage
-Just add it on the middleware pipeline.
+Just add it on the middleware pipeline and initialize it.
+
+For instance, in Rails, in an initializer add:
+
+```ruby
+Rack::Reqorder.configure do |config|
+  config.mongoid_yml = File.join(Rails.root, 'config', 'mongoid.yml')
+end
+
+Rack::Reqorder.boot!
+
+Rails.application.config.middleware.insert(0, Rack::Reqorder::Logger)
+```
 
 ## Development
 
