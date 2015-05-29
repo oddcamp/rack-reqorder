@@ -8,15 +8,21 @@ module Rack
       end
 
       def call(environment)
-        #api_session = ApiSession.create(created_at: Time.now)
         request = Rack::Request.new(environment)
-        #api_session.request
 
-        HttpRequest.create(
+        http_request = HttpRequest.create(
+          ip: request.ip,
+          url: request.url,
+          scheme: request.scheme,
+          base_url: request.base_url,
+          port: request.port,
           path: request.path,
           full_path: request.fullpath,
+          method: request.request_method,
           headers: extract_all_headers(request),
-          parameters: request.params,
+          params: request.params,
+          ssl: request.ssl?,
+          xhr: request.xhr?
         )
 
         status, headers, body = @app.call(request.env)
@@ -26,7 +32,8 @@ module Rack
         HttpResponse.create(
           headers: response.headers,
           #body: response.body.first,
-          status: response.status.to_i
+          status: response.status.to_i,
+          http_request: http_request
         )
 =begin
         response.finish
@@ -40,6 +47,8 @@ module Rack
             k.start_with? 'HTTP_'
           }.map{|k,v|
             [k.gsub('HTTP_','').upcase, v]
+          }.select{|k,v|
+            k != 'COOKIE'
           }
         ]
       end
