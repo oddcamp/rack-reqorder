@@ -54,5 +54,7 @@ end
 
 require 'rack/reqorder/models/http_request'
 require 'rack/reqorder/models/http_response'
+require 'rack/reqorder/models/app_exception'
+require 'rack/reqorder/services/backtrace_cleaner'
 require 'rack/reqorder/logger'
 require 'rack/reqorder/monitor'

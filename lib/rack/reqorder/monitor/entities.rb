@@ -3,9 +3,9 @@ module Rack::Reqorder::Monitor
     class BaseEntity < Grape::Entity
       expose :_id, documentation: { type: 'String', desc: 'BSON::ObjectId String' }, :format_with => :to_string, as: :id
       format_with(:to_string) { |foo| foo.to_s }
-      format_with(:iso_timestamp) { |dt| dt.utc.iso8601 }
+      format_with(:iso_timestamp) { |dt| dt.utc.iso8601 if dt }
 
-      format_with(:association_id) {|a| a.id.to_s}
+      format_with(:association_id) {|a| a.id.to_s if a}
     end
 
     class RequestEntity < BaseEntity
@@ -48,6 +48,27 @@ module Rack::Reqorder::Monitor
       with_options(format_with: :association_id) do
         expose :http_request, as: :request_id
       end
+    end
+
+
+    class ExceptionEntity < BaseEntity
+      root :exceptions, :exception
+
+      expose :message
+      expose :application_trace
+      expose :full_trace
+      expose :line
+      expose :path
+      expose :source_extract
+
+      with_options(format_with: :iso_timestamp) do
+        expose :created_at
+      end
+
+      with_options(format_with: :association_id) do
+        expose :http_request, as: :request_id
+      end
+
     end
   end
 end
