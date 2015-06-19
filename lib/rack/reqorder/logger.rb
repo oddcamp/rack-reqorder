@@ -18,7 +18,7 @@ module Rack
           port: request.port,
           path: request.path,
           full_path: request.fullpath,
-          method: request.request_method,
+          http_method: request.request_method,
           headers: extract_all_headers(request),
           params: request.params,
           ssl: request.ssl?,
