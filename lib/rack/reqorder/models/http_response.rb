@@ -13,7 +13,7 @@ module Rack::Reqorder::Models
 
     before_create :set_response_time
 
-    private
+  private
     def set_response_time
       self.response_time = self.created_at - self.http_request.created_at
     end

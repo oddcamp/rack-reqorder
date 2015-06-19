@@ -41,7 +41,7 @@ module Rack::Reqorder::Monitor
       #element routes
       route_param :id do
         get do
-          present(HttpRequest.find(params[:id]), with: HttpRequestEntity)
+          present(HttpRequest.find(params[:id]), with: RequestEntity)
         end
       end
     end
@@ -53,7 +53,7 @@ module Rack::Reqorder::Monitor
 
         responses = apply_filters(responses, params)
 
-        meta_aggregations = aggregations(requests, params)
+        meta_aggregations = aggregations(exceptions, params)
 
         responses = paginate(responses, params)
 
@@ -67,7 +67,33 @@ module Rack::Reqorder::Monitor
       #element routes
       route_param :id do
         get do
-          present(HttpResponse.find(params[:id]), with: HttpResponseEntity)
+          present(HttpResponse.find(params[:id]), with: ResponseEntity)
+        end
+      end
+    end
+
+    #collection routes
+    resource :exceptions do
+      get do
+        exceptions = AppException.all
+
+        exceptions = apply_filters(exceptions, params)
+
+        meta_aggregations = aggregations(exceptions, params)
+
+        exceptions = paginate(exceptions, params)
+
+        present_with_meta(
+          exceptions,
+          present(exceptions, with: ExceptionEntity),
+          meta_aggregations
+        )
+      end
+
+      #element routes
+      route_param :id do
+        get do
+          present(AppException.find(params[:id]), with: ExceptionEntity)
         end
       end
     end

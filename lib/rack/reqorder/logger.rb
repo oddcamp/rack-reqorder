@@ -1,56 +1,100 @@
-module Rack
-  module Reqorder
-    class Logger
-      include Rack::Reqorder::Models
+module Rack::Reqorder
+  class Logger
+    include Rack::Reqorder::Models
 
-      def initialize(app)
-        @app = app
+    def initialize(app)
+      @app = app
+    end
+
+    def call(environment)
+      http_request = save_http_request(environment)
+
+      begin
+        status, headers, body = @app.call(environment)
+      rescue => exception
+        log_exception(exception, http_request)
+        raise exception
       end
 
-      def call(environment)
-        request = Rack::Request.new(environment)
+      save_http_response(body, status, headers, http_request)
 
-        http_request = HttpRequest.create(
-          ip: request.ip,
-          url: request.url,
-          scheme: request.scheme,
-          base_url: request.base_url,
-          port: request.port,
-          path: request.path,
-          full_path: request.fullpath,
-          http_method: request.request_method,
-          headers: extract_all_headers(request),
-          params: request.params,
-          ssl: request.ssl?,
-          xhr: request.xhr?
-        )
+      return [status, headers, body]
+    end
 
-        status, headers, body = @app.call(request.env)
+  private
 
-        response = Rack::Response.new(body, status, headers)
+    def extract_all_headers(request)
+      Hash[
+        request.env.select{|k,v|
+          k.start_with? 'HTTP_'
+        }.map{|k,v|
+          [k.gsub('HTTP_','').upcase, v]
+        }.select{|k,v|
+          k != 'COOKIE'
+        }
+      ]
+    end
 
-        HttpResponse.create(
-          headers: response.headers,
-          #body: response.body.first,
-          status: response.status.to_i,
-          http_request: http_request
-        )
-=begin
-        response.finish
-=end
-        return [status, headers, body]
-      end
+    def save_http_request(environment)
+      request = Rack::Request.new(environment)
 
-      def extract_all_headers(request)
-        Hash[
-          request.env.select{|k,v|
-            k.start_with? 'HTTP_'
-          }.map{|k,v|
-            [k.gsub('HTTP_','').upcase, v]
-          }.select{|k,v|
-            k != 'COOKIE'
-          }
-        ]
+      return HttpRequest.create(
+        ip: request.ip,
+        url: request.url,
+        scheme: request.scheme,
+        base_url: request.base_url,
+        port: request.port,
+        path: request.path,
+        full_path: request.fullpath,
+        http_method: request.request_method,
+        headers: extract_all_headers(request),
+        params: request.params,
+        ssl: request.ssl?,
+        xhr: request.xhr?
+      )
+    end
+
+    def save_http_response(body, status, headers, http_request)
+      response = Rack::Response.new(body, status, headers)
+
+      HttpResponse.create(
+        headers: response.headers,
+        #body: response.body.first,
+        status: response.status.to_i,
+        http_request: http_request
+      )
+    end
+
+    def log_exception(exception, http_request)
+      bc = BacktraceCleaner.new
+      bc.add_filter   { |line| line.gsub(Rails.root.to_s, '') }
+      bc.add_silencer { |line| line =~ /gems/ }
+
+      application_trace = bc.clean(exception.backtrace)
+
+      path, line, _ = application_trace.first.split(':')
+
+      AppException.create(
+        message: exception.message,
+        application_trace: application_trace,
+        full_trace: exception.backtrace,
+        line: line.to_i,
+        path: path[1..-1],
+        source_extract: source_fragment(path[1..-1], line.to_i),
+        http_request: http_request
+      )
+    end
+
+    def source_fragment(path, line)
+      return unless Rails.respond_to?(:root) && Rails.root
+
+      full_path = Rails.root.join(path)
+      if File.exist?(full_path)
+        File.open(full_path, "r") do |file|
+          start = [line - 3, 0].max
+          lines = file.each_line.drop(start).take(6)
+          Hash[*(start+1..(lines.count+start)).zip(lines).flatten]
+        end
       end
     end
   end

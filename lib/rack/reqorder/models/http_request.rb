@@ -18,6 +18,7 @@ module Rack::Reqorder::Models
     field :created_at, type: Time, default: ->{ Time.now }
 
     has_one :http_response
+    has_one :app_exception
 
   end
 end
