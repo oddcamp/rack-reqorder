@@ -24,6 +24,22 @@ module Rack
       )
     end
 
+    def self.paths
+      return @paths unless @paths.blank?
+      @paths = {}
+      Rails.application.routes.routes.routes.each do |route|
+        @paths[route.defaults] = route.path.spec.left.to_s
+      end
+
+      return @paths
+    end
+
+    def self.recognise_path(path_uri, options = {})
+      Rack::Reqorder.paths[Rails.application.routes.recognize_path(path_uri, options)
+        .select{|key, value| [:action, :controller].include?(key)}
+      ]
+    end
+
     class Configuration
       attr_accessor :mongoid_yml, :environment
 
@@ -53,8 +69,12 @@ Kaminari.configure do |config|
 end
 
 require 'rack/reqorder/models/http_request'
+require 'rack/reqorder/models/route_path'
 require 'rack/reqorder/models/http_response'
+require 'rack/reqorder/models/app_fault'
 require 'rack/reqorder/models/app_exception'
 require 'rack/reqorder/services/backtrace_cleaner'
 require 'rack/reqorder/logger'
 require 'rack/reqorder/monitor'
+
+load 'rack/reqorder/tasks/routes.rake'
