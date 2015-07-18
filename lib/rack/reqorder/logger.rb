@@ -38,7 +38,12 @@ module Rack::Reqorder
     def save_http_request(environment)
       request = Rack::Request.new(environment)
 
-      return HttpRequest.create(
+      route_path = RoutePath.find_or_create_by({
+        route: Rack::Reqorder.recognise_path(request.path),
+        http_method: request.request_method
+      })
+
+      HttpRequest.create({
         ip: request.ip,
         url: request.url,
         scheme: request.scheme,
@@ -50,8 +55,9 @@ module Rack::Reqorder
         headers: extract_all_headers(request),
         params: request.params,
         ssl: request.ssl?,
-        xhr: request.xhr?
-      )
+        xhr: request.xhr?,
+        route_path: route_path
+      })
     end
 
     def save_http_response(body, status, headers, http_request)
@@ -72,17 +78,33 @@ module Rack::Reqorder
 
       application_trace = bc.clean(exception.backtrace)
 
-      path, line, _ = application_trace.first.split(':')
+      path = line = nil
+
+      if not application_trace.blank?
+        path, line, _ = application_trace.first.split(':')
+      else
+        path, line, _ = exception.backtrace.first.split(':')
+      end
+
+
+      app_fault = AppFault.find_or_create_by(
+        e_class: exception.class,
+        line: line.to_i,
+        filepath: path[1..-1]
+      )
 
       AppException.create(
+        e_class: exception.class,
         message: exception.message,
         application_trace: application_trace,
         full_trace: exception.backtrace,
         line: line.to_i,
-        path: path[1..-1],
+        filepath: path[1..-1],
         source_extract: source_fragment(path[1..-1], line.to_i),
+        app_fault: app_fault,
         http_request: http_request
       )
+
     end
 
     def source_fragment(path, line)
