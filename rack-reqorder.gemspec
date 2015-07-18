@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "grape"
   spec.add_dependency "grape-entity"
   spec.add_dependency "kaminari"
+  spec.add_dependency "rack-cors"
 end

@@ -75,7 +75,7 @@ module Rack::Reqorder::Monitor
       expose :e_class, as: :class
       expose :line
       expose :filepath
-      expose :count
+      expose :app_exceptions_count, as: :exceptions_count
 
       with_options(format_with: :association_ids) do
         expose :app_exception_ids, as: :exception_ids
