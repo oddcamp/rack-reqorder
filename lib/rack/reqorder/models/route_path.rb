@@ -14,12 +14,11 @@ module Rack::Reqorder::Models
 
     has_many :http_requests, dependent: :destroy
 
-    before_save :set_aggregated_attrs!
+    before_save :set_aggregated_attrs
 
-    def set_aggregated_attrs!
+    def set_aggregated_attrs
       self.http_requests_count = self.http_requests.count
       self.avg_response_time = self.http_requests.avg(:response_time)
-      self.save!
     end
   end
 end

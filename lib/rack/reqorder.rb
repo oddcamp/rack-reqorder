@@ -35,7 +35,7 @@ module Rack
     end
 
     def self.recognise_path(path_uri, options = {})
-      Rack::Reqorder.paths[Rails.application.routes.recognize_path(path_uri, options)
+      res = Rack::Reqorder.paths[Rails.application.routes.recognize_path(path_uri, options)
         .select{|key, value| [:action, :controller].include?(key)}
       ]
     end

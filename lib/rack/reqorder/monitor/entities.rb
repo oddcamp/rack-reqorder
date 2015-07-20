@@ -72,13 +72,12 @@ module Rack::Reqorder::Monitor
     class FaultEntity < BaseEntity
       root :faults, :fault
 
-      expose :e_class, as: :class
+      expose :e_class
       expose :line
       expose :filepath
       expose :app_exceptions_count, as: :exceptions_count
-
-      with_options(format_with: :association_ids) do
-        expose :app_exception_ids, as: :exception_ids
+      expose :message do |fault, options|
+        fault.app_exceptions.first.message
       end
 
       with_options(format_with: :iso_timestamp) do

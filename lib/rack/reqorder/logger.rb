@@ -105,6 +105,10 @@ module Rack::Reqorder
         http_request: http_request
       )
 
+      HttpResponse.create(
+        status: 500,
+        http_request: http_request
+      )
     end
 
     def source_fragment(path, line)
