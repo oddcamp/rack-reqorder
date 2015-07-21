@@ -22,8 +22,7 @@ module Rack::Reqorder::Models
 
   private
     def update_count
-      self.app_fault.app_exceptions_count = self.class.count
-      self.app_fault.save!
+      self.app_fault.update_count!
     end
   end
 end

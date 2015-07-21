@@ -11,5 +11,10 @@ module Rack::Reqorder::Models
     field :app_exceptions_count, type: Integer, default: 0
 
     has_many :app_exceptions, dependent: :destroy
+
+    def update_count!
+      self.app_exceptions_count = self.app_exceptions.count
+      self.save!
+    end
   end
 end

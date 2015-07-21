@@ -80,6 +80,10 @@ module Rack::Reqorder::Monitor
         fault.app_exceptions.first.message
       end
 
+      expose :app_exception_ids, as: :exception_ids do |fault, options|
+        fault.app_exception_ids.map(&:to_s).first(100)
+      end
+
       with_options(format_with: :iso_timestamp) do
         expose :created_at
         expose :updated_at
@@ -103,6 +107,7 @@ module Rack::Reqorder::Monitor
 
       with_options(format_with: :association_id) do
         expose :http_request, as: :request_id
+        expose :app_fault, as: :fault_id
       end
 
     end

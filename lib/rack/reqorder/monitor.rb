@@ -117,7 +117,7 @@ module Rack::Reqorder::Monitor
       #element routes
       route_param :id do
         get do
-          present(AppException.find(params[:id]), with: ExceptionEntity)
+          present(AppFault.find(params[:id]), with: FaultEntity)
         end
       end
     end
