@@ -7,16 +7,23 @@ module Rack::Reqorder
     end
 
     def call(environment)
-      http_request = save_http_request(environment)
+      #http_request = save_http_request(environment)
 
+      start = Time.now.to_f
       begin
         status, headers, body = @app.call(environment)
       rescue => exception
-        log_exception(exception, http_request)
+        log_exception(exception, environment)
         raise exception
       end
+      response_time = Time.now.to_f - start
 
-      save_http_response(body, status, headers, http_request)
+      #save_http_response(body, status, headers, http_request)
+      save_statistics(
+        rack_request: Rack::Request.new(environment),
+        rack_response: Rack::Response.new(body, status, headers),
+        response_time: response_time
+      )
 
       return [status, headers, body]
     end
@@ -33,6 +40,39 @@ module Rack::Reqorder
           k != 'COOKIE'
         }
       ]
+    end
+
+    def save_statistics(rack_request:, rack_response:, response_time:)
+      route_path = RoutePath.find_or_create_by({
+        route: Rack::Reqorder.recognise_path(rack_request.path),
+        http_method: rack_request.request_method
+      })
+
+      [:all.to_s, DateTime.now.hour.to_s].each do |key|
+        statistic = route_path.send("statistic_#{key}".to_sym)
+
+        if statistic.nil?
+          statistic = route_path.send("create_statistic_#{key}")
+        end
+
+        statistic.inc({
+          statuses_2xx: (rack_response.status < 300 && rack_response.status >= 200)? 1: 0,
+          statuses_3xx: (rack_response.status < 400 && rack_response.status >= 300)? 1: 0,
+          statuses_4xx: (rack_response.status < 500 && rack_response.status >= 400)? 1: 0,
+          statuses_401: (rack_response.status == 401) ? 1 : 0,
+          statuses_404: (rack_response.status == 404) ? 1 : 0,
+          statuses_422: (rack_response.status == 422) ? 1 : 0,
+          statuses_5xx: (rack_response.status < 600 && rack_response.status >= 500)? 1: 0,
+          http_requests_count: 1,
+          xhr_count: rack_request.xhr? ? 1 : 0,
+          ssl_count: rack_request.ssl? ? 1 : 0,
+        })
+
+        statistic.recalculate_average!(response_time)
+
+        route_path.save!
+        route_path.send("statistic_#{key}".to_sym).save!
+      end
     end
 
     def save_http_request(environment)
@@ -71,7 +111,9 @@ module Rack::Reqorder
       )
     end
 
-    def log_exception(exception, http_request)
+    def log_exception(exception, environment)
+      http_request = save_http_request(environment)
+
       bc = BacktraceCleaner.new
       bc.add_filter   { |line| line.gsub(Rails.root.to_s, '') }
       bc.add_silencer { |line| line =~ /gems/ }

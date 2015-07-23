@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "grape-entity"
   spec.add_dependency "kaminari"
   spec.add_dependency "rack-cors"
+  spec.add_dependency "mongoid_hash_query", "~> 0.2.4"
 end

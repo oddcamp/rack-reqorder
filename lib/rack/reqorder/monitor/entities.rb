@@ -9,13 +9,38 @@ module Rack::Reqorder::Monitor
       format_with(:association_ids) {|a| a.map{|i| i.to_s if i} if a }
     end
 
+    class StatisticEntity < BaseEntity
+      root :statistics, :statistic
+
+      expose :http_requests_count
+      expose :avg_response_time
+      expose :statuses_2xx
+      expose :statuses_3xx
+      expose :statuses_4xx
+      expose :statuses_401
+      expose :statuses_404
+      expose :statuses_422
+      expose :statuses_5xx
+
+      expose :xhr_count
+      expose :ssl_count
+
+      with_options(format_with: :iso_timestamp) do
+        expose :created_at
+        expose :updated_at
+      end
+    end
+
     class RoutePathEntity < BaseEntity
       root :route_paths, :route_path
 
       expose :route
       expose :http_method
-      expose :http_requests_count
-      expose :avg_response_time
+      expose :statistic_all, using: StatisticEntity
+
+      1.upto(24) do |num|
+        expose "statistic_#{num}", using: StatisticEntity
+      end
 
       with_options(format_with: :iso_timestamp) do
         expose :created_at
@@ -77,7 +102,7 @@ module Rack::Reqorder::Monitor
       expose :filepath
       expose :app_exceptions_count, as: :exceptions_count
       expose :message do |fault, options|
-        fault.app_exceptions.first.message
+        fault.app_exceptions.try(:first).try(:message)
       end
 
       expose :app_exception_ids, as: :exception_ids do |fault, options|

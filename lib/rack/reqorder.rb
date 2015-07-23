@@ -68,6 +68,7 @@ Kaminari.configure do |config|
   # config.param_name = :page
 end
 
+require 'rack/reqorder/models/statistic'
 require 'rack/reqorder/models/http_request'
 require 'rack/reqorder/models/route_path'
 require 'rack/reqorder/models/http_response'
