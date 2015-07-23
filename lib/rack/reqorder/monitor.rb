@@ -162,7 +162,10 @@ module Rack::Reqorder::Monitor
       end
 
       def paginate(object, params)
-        return object.page(params[:page] || 1).per(params[:per_page] || 30)
+        return object.
+          page(params[:page] || 1).
+          per(params[:per_page] || 30).
+          skip(params[:skip] || 0)
       end
     end
 
