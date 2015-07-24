@@ -1,6 +1,14 @@
 # Rack::Reqorder
 
-Simple gem that records requests and responses. Uses MongoDB.
+Simple gem for monitoring Rack apps. Uses MongoDB. It can be used in combination
+with [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor).
+
+## Introduction
+Simple gem that sits on top of Rack and records request/response statistics
+as well as monitors for exceptions. It saves everything in MongoDB and exposes
+a simple API for retrieving these data.
+
+The API is very robust, built with the help of [mongoid_hash_query](https://github.com/kollegorna/mongoid_hash_query).
 
 ## Installation
 
@@ -30,8 +38,18 @@ end
 
 Rack::Reqorder.boot!
 
-Rails.application.config.middleware.insert(0, Rack::Reqorder::Logger)
+Rails.application.config.middleware.insert_after(ActionDispatch::DebugExceptions , Rack::Reqorder::Logger)
+
+#rack-cors also needed
+Rails.application.config.middleware.insert_before 0, "Rack::Cors" do
+  allow do
+    origins '*'
+    resource '*', :headers => :any, :methods => [:get, :post, :options]
+  end
+end
 ```
+Please note that you can configure origins and resource depending on how you
+mount the rack-monitor engine and where you deploy your front-end.
 
 ## Development
 
