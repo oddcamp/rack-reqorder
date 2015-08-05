@@ -3,9 +3,14 @@ require 'active_support/inflector'
 require 'mongoid'
 require 'kaminari'
 require 'kaminari/models/mongoid_extension'
+require 'rack/reqorder/route_recognizers'
 
 module Rack
   module Reqorder
+    extend Rack::Reqorder::GrapeRecognizer
+    extend Rack::Reqorder::SinatraRecognizer
+    extend Rack::Reqorder::RailsRecognizer
+
     class << self
       attr_accessor :configuration
     end
@@ -22,22 +27,6 @@ module Rack
         self.configuration.mongoid_yml,
         self.configuration.environment
       )
-    end
-
-    def self.paths
-      return @paths unless @paths.blank?
-      @paths = {}
-      Rails.application.routes.routes.routes.each do |route|
-        @paths[route.defaults] = route.path.spec.left.to_s
-      end
-
-      return @paths
-    end
-
-    def self.recognise_path(path_uri, options = {})
-      res = Rack::Reqorder.paths[Rails.application.routes.recognize_path(path_uri, options)
-        .select{|key, value| [:action, :controller].include?(key)}
-      ]
     end
 
     class Configuration
