@@ -7,7 +7,7 @@ module Rack::Reqorder
     end
 
     def call(environment)
-      #http_request = save_http_request(environment)
+      rack_request = Rack::Request.new(environment.clone)
 
       start = Time.now.to_f
       begin
@@ -18,9 +18,8 @@ module Rack::Reqorder
       end
       response_time = Time.now.to_f - start
 
-      #save_http_response(body, status, headers, http_request)
       save_statistics(
-        rack_request: Rack::Request.new(environment),
+        rack_request: rack_request,
         rack_response: Rack::Response.new(body, status, headers),
         response_time: response_time
       )
@@ -42,9 +41,17 @@ module Rack::Reqorder
       ]
     end
 
+    def route_template(request_path:, request_method:)
+      Rack::Reqorder.recognize_path(request_path, {method: request_method})
+    end
+
     def save_statistics(rack_request:, rack_response:, response_time:)
       route_path = RoutePath.find_or_create_by({
-        route: Rack::Reqorder.recognise_path(rack_request.path),
+        route: route_template({
+          #response_status: rack_response.status,
+          request_path: rack_request.path,
+          request_method: rack_request.request_method
+        }),
         http_method: rack_request.request_method
       })
 
@@ -79,7 +86,7 @@ module Rack::Reqorder
       request = Rack::Request.new(environment)
 
       route_path = RoutePath.find_or_create_by({
-        route: Rack::Reqorder.recognise_path(request.path),
+        route: Rack::Reqorder.recognize_path(request.path),
         http_method: request.request_method
       })
 
