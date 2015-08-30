@@ -38,9 +38,12 @@ module Rack::Reqorder::Monitor
       expose :http_method
       expose :statistic_all, using: StatisticEntity
 
+=begin
       1.upto(24) do |num|
         expose "statistic_#{num}", using: StatisticEntity
       end
+=end
+
 
       with_options(format_with: :iso_timestamp) do
         expose :created_at
@@ -109,6 +112,10 @@ module Rack::Reqorder::Monitor
         fault.app_exception_ids.map(&:to_s).first(100)
       end
 
+      with_options(format_with: :association_id) do
+        expose :route_path, as: :route_path_id
+      end
+
       with_options(format_with: :iso_timestamp) do
         expose :created_at
         expose :updated_at
@@ -135,6 +142,24 @@ module Rack::Reqorder::Monitor
         expose :app_fault, as: :fault_id
       end
 
+    end
+
+    class SessionEntity < Grape::Entity
+      expose :id do |status, options|
+        1
+      end
+
+      expose :email  do |status, options|
+        Rack::Reqorder.configuration.auth_email
+      end
+
+      expose :token  do |status, options|
+        #need user object...
+        Digest::MD5.hexdigest(
+          Rack::Reqorder.configuration.auth_email +
+          Rack::Reqorder.configuration.auth_password
+        )
+      end
     end
   end
 end

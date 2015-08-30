@@ -12,17 +12,19 @@ module Rack::Reqorder
       start = Time.now.to_f
       begin
         status, headers, body = @app.call(environment)
+        response = Rack::Response.new(body, status, headers)
       rescue => exception
-        log_exception(exception, environment)
+        response = log_exception(exception, environment)
         raise exception
-      end
-      response_time = Time.now.to_f - start
+      ensure
+        response_time = Time.now.to_f - start
 
-      save_statistics(
-        rack_request: rack_request,
-        rack_response: Rack::Response.new(body, status, headers),
-        response_time: response_time
-      )
+        save_statistics(
+          rack_request: rack_request,
+          rack_response: response,
+          response_time: response_time
+        )
+      end
 
       return [status, headers, body]
     end
@@ -139,7 +141,8 @@ module Rack::Reqorder
       app_fault = AppFault.find_or_create_by(
         e_class: exception.class,
         line: line.to_i,
-        filepath: path[1..-1]
+        filepath: path[1..-1],
+        route_path: http_request.route_path
       )
 
       AppException.create(
@@ -154,7 +157,7 @@ module Rack::Reqorder
         http_request: http_request
       )
 
-      HttpResponse.create(
+      return HttpResponse.create(
         status: 500,
         http_request: http_request
       )

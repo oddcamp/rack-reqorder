@@ -20,8 +20,9 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.8"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "pry"
   spec.add_dependency "mongoid", "~> 4.0.0"
-  spec.add_dependency "activesupport", "~> 4.1.6"
+  spec.add_dependency "activesupport", ">4.0.0"
   spec.add_dependency "grape"
   spec.add_dependency "grape-entity"
   spec.add_dependency "kaminari"

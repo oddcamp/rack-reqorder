@@ -1,5 +1,6 @@
 require 'grape'
 require 'grape-entity'
+require 'rack/reqorder/monitor/helpers'
 require 'rack/reqorder/monitor/entities'
 require 'mongoid_hash_query'
 require 'pry'
@@ -10,20 +11,32 @@ module Rack::Reqorder
 end
 
 module Rack::Reqorder::Monitor
+
   class Api < Grape::API
     include Rack::Reqorder::Models
     include Rack::Reqorder::Monitor::Entities
 
     helpers do
       include MongoidHashQuery
+      include Rack::Reqorder::Monitor::Helpers
     end
 
     version 'v1', using: :path, vendor: 'foobar'
     format :json
     prefix :api
 
+=begin
+    rescue_from Grape::Exceptions::ValidationErrors do |e|
+      error!({errors: e.send(:full_messages)}, 422)
+    end
+=end
+
     #collection routes
     resource :route_paths do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
       get do
         route_paths = apply_filters(RoutePath.all, params)
 
@@ -48,6 +61,10 @@ module Rack::Reqorder::Monitor
 
     #collection routes
     resource :requests do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
       get do
         requests = apply_filters(HttpRequest.all, params)
 
@@ -72,6 +89,10 @@ module Rack::Reqorder::Monitor
 
     #collection routes
     resource :responses do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
       get do
         responses = HttpResponse.all
 
@@ -98,6 +119,10 @@ module Rack::Reqorder::Monitor
 
     #collection routes
     resource :faults do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
       get do
         faults = AppFault.all
 
@@ -124,6 +149,10 @@ module Rack::Reqorder::Monitor
 
     #collection routes
     resource :exceptions do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
       get do
         exceptions = AppException.all
 
@@ -145,6 +174,20 @@ module Rack::Reqorder::Monitor
         get do
           present(AppException.find(params[:id]), with: ExceptionEntity)
         end
+      end
+    end
+
+    params do
+      requires :user, type: Hash do
+        requires :email, type: String
+        requires :password, type: String
+      end
+    end
+    resource :sessions do
+      post do
+        authenticate_user!(declared(params))
+
+        present(Object.new, with: SessionEntity)
       end
     end
 

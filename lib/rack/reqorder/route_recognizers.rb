@@ -6,24 +6,26 @@ module Rack
 
         @prefixes = {} #{'/mount_prefix' => {search_method: xxx_recognize_path, rack_app: xxx}}
         Rails.application.routes.routes.routes.select{|r| r.defaults.blank?}.each do |route|
-          if route.app.respond_to?(:superclass)
-            case route.app.superclass.to_s
-            when Sinatra::Base.to_s
-              @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
-                search_method: :sinatra_recognize_path,
-                rack_app: route.app
-              }
-            when Rails::Engine.to_s
-              @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
-                search_method: :rails_recognize_path,
-                rack_app: route.app
-              }
-            when Grape::API.to_s
-              @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
-                search_method: :grape_recognize_path,
-                rack_app: route.app
-              }
-            end
+          __superclass = route.app.try(:superclass) || route.app.try(:app).try(:superclass)
+
+          next unless __superclass
+
+          case __superclass.to_s
+          when Sinatra::Base.to_s
+            @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
+              search_method: :sinatra_recognize_path,
+              rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app
+            }
+          when Rails::Engine.to_s
+            @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
+              search_method: :rails_recognize_path,
+              rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app
+            }
+          when Grape::API.to_s
+            @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
+              search_method: :grape_recognize_path,
+              rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app
+            }
           end
         end
 
@@ -32,8 +34,8 @@ module Rack
 
       def rails_paths(rails_app)
         paths = {}
-        rails_app.routes.routes.routes.each do |route|
-          paths[route.defaults] = route.path.spec.left.to_s
+        rails_app.routes.routes.routes.reverse.each do |route|
+          paths[route.defaults] = route.path.spec.to_s.gsub('(.:format)', '')
         end
 
         return paths
@@ -60,11 +62,15 @@ module Rack
           end
         end
 
-        rails_recognize_path(
-          path_uri: path_uri,
-          rack_app: Rails.application,
-          options: options
-        )
+        begin
+          return rails_recognize_path(
+            path_uri: path_uri,
+            rack_app: Rails.application,
+            options: options
+          )
+        rescue ActionController::RoutingError
+          return "/#{path_uri.split('/')[1]}"
+        end
       end
 
       #rack_app is basically a rails app here but we keep it for the sake of the interface
@@ -93,9 +99,14 @@ module Rack
         rack_app.routes.each do |route|
           route_options = route.instance_variable_get(:@options)
           if route_options[:method] == options[:method] && route_options[:compiled] =~ path_uri
-            return route_options[:path].
-              gsub(':version', route_options[:version]).
-              gsub('(.json)', '')
+           # if route_options[:method] == "OPTIONS"
+           #   return route_options[:path].
+           #     gsub('(.json)', '')
+           # else
+              return route_options[:path].
+                gsub(':version', route_options[:version]).
+                gsub('(.json)', '')
+           # end
           end
         end
 

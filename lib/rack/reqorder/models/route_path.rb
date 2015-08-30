@@ -36,5 +36,7 @@ module Rack::Reqorder::Models
     embeds_one :statistic_24, class_name: 'Rack::Reqorder::Models::Statistic'
 
     embeds_one :statistic_all, class_name: 'Rack::Reqorder::Models::Statistic'
+
+    has_one :app_fault, dependent: :destroy
   end
 end
