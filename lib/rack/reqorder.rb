@@ -73,3 +73,4 @@ require 'rack/reqorder/logger'
 require 'rack/reqorder/monitor'
 
 load 'rack/reqorder/tasks/routes.rake'
+load 'rack/reqorder/tasks/test_database.rake'

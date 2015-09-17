@@ -60,6 +60,17 @@ module Rack::Reqorder::Monitor
     end
 
     #collection routes
+    resource :route_path_24_statistics do
+      get do
+        route_paths = RoutePath.all
+
+        route_paths = apply_filters(route_paths, params)
+
+        present(route_paths, with: RoutePath24StatisticsEntity)
+      end
+    end
+
+    #collection routes
     resource :requests do
       before do
         authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
@@ -176,6 +187,7 @@ module Rack::Reqorder::Monitor
         end
       end
     end
+
 
     params do
       requires :user, type: Hash do
