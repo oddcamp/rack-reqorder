@@ -27,7 +27,13 @@ Or install it yourself as:
     $ gem install rack-reqorder
 
 ## Usage
-Just add it on the middleware pipeline and initialize it.
+You first need to initialize mongoid/mongodb by running:
+
+```bash
+bundle exec rails g mongoid:config
+```
+
+Then just add it on the middleware pipeline and initialize it.
 
 For instance, in Rails, in an initializer add:
 
@@ -50,6 +56,8 @@ end
 ```
 Please note that you can configure origins and resource depending on how you
 mount the rack-monitor engine and where you deploy your front-end.
+
+For viewing your statistics please check [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor)
 
 ## Development
 

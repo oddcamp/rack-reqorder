@@ -8,8 +8,11 @@ module Rack::Reqorder::Models
     field :line, type: Integer
     field :filepath, type: String
 
+    field :resolved, type: Boolean, default: false
+
     field :app_exceptions_count, type: Integer, default: 0
 
+    belongs_to :route_path, dependent: :nullify
     has_many :app_exceptions, dependent: :destroy
 
     def update_count!

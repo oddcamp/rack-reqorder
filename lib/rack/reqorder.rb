@@ -30,7 +30,8 @@ module Rack
     end
 
     class Configuration
-      attr_accessor :mongoid_yml, :environment
+      attr_accessor :mongoid_yml, :environment, :auth_email, :auth_password,
+        :no_auth
 
       def validate!
         if mongoid_yml.blank?
@@ -41,6 +42,10 @@ module Rack
           puts 'rack-reqorder: No environment found, assuming development environment'
           self.environment = :development
         end
+
+        self.auth_email = 'admin@example.com' if auth_email.blank?
+        self.auth_password = 'password' if auth_password.blank?
+        self.no_auth = false if self.no_auth.blank?
       end
     end
   end
