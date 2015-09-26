@@ -20,7 +20,11 @@ module Rack::Reqorder::Models
     field :xhr_count, type: Integer, default: 0
     field :ssl_count, type: Integer, default: 0
 
-    embedded_in :route_path
+    embedded_in :route_path, inverse_of: :statistic_all
+
+    0.upto(23) do |i|
+      embedded_in :route_path, inverse_of: "statistic_#{i}"
+    end
 
     def recalculate_average!(response_time)
       self.avg_response_time = (

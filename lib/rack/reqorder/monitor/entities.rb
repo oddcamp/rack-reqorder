@@ -44,10 +44,42 @@ module Rack::Reqorder::Monitor
       end
 =end
 
-
       with_options(format_with: :iso_timestamp) do
         expose :created_at
         expose :updated_at
+      end
+    end
+
+    class RoutePath24StatisticsEntity < Grape::Entity
+      root :route_path_25_statistics
+      present_collection true
+
+      exposures = proc{|aggrs, field|
+        aggrs.each do |aggr|
+          expose aggr do |route_path, options|
+            array = []
+            0.upto(23) do |i|
+              array << route_path[:items].where(
+                "statistic_#{i}.created_at".to_sym.gte => DateTime.now.to_date
+              ).send(aggr,("statistic_#{i}.#{field}"))
+            end
+
+            array
+          end
+        end
+      }
+
+      [:http_requests_count, :statuses_2xx, :statuses_3xx, :statuses_4xx,
+       :statuses_401, :statuses_404, :statuses_422, :statuses_5xx,
+       :xhr_count, :ssl_count
+      ].each do |field|
+        expose field do
+          exposures.call([:sum], field)
+        end
+      end
+
+      expose :avg_response_time do
+        exposures.call([:avg], :avg_response_time)
       end
     end
 
