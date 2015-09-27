@@ -206,21 +206,21 @@ module Rack::Reqorder::Monitor
     helpers do
       def present_with_meta(object, hash, extra_meta)
         hash[:meta] = {
-          currentPage: object.current_page,
-          nextPage: object.next_page,
-          prevPage: object.prev_page,
-          totalPages: object.total_pages,
-          totalCount: object.total_count
+          current_page: object.current_page,
+          next_page: object.next_page,
+          prev_page: object.prev_page,
+          total_pages: object.total_pages,
+          total_count: object.total_count
         }.merge(extra_meta)
 
         return hash
       end
 
       def paginate(object, params)
-        return object.
-          page(params[:page] || 1).
-          per(params[:per_page] || 30).
-          skip(params[:skip] || 0)
+        object = object.page(params[:page] || 1).per(params[:per_page] || 30)
+        object = object.skip(params[:skip]) if params[:skip]
+
+        return object
       end
     end
 
