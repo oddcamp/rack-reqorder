@@ -141,12 +141,12 @@ module Rack::Reqorder
         path, line, _ = exception.backtrace.first.split(':')
       end
 
-
       app_fault = AppFault.find_or_create_by(
         e_class: exception.class,
         line: line.to_i,
         filepath: path[1..-1],
-        route_path: http_request.route_path
+        route_path: http_request.route_path,
+        environment: app_environment
       )
 
       AppException.create(
@@ -177,6 +177,14 @@ module Rack::Reqorder
           lines = file.each_line.drop(start).take(6)
           Hash[*(start+1..(lines.count+start)).zip(lines).flatten]
         end
+      end
+    end
+
+    def app_environment
+      if Module.const_defined?(:Rails)
+        return Rails.env
+      else
+        return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'unknown'
       end
     end
   end
