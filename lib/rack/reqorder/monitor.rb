@@ -155,6 +155,19 @@ module Rack::Reqorder::Monitor
         get do
           present(AppFault.find(params[:id]), with: FaultEntity)
         end
+
+        params do
+          requires :fault, type: Hash do
+            optional :resolved, type: Boolean
+          end
+        end
+        put do
+          fault = AppFault.find(params[:id])
+          fault.resolved = declared(params)[:fault][:resolved]
+          fault.save!
+
+          present(fault, with: FaultEntity)
+        end
       end
     end
 

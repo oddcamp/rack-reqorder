@@ -135,6 +135,7 @@ module Rack::Reqorder::Monitor
       expose :e_class
       expose :line
       expose :filepath
+      expose :resolved
       expose :app_exceptions_count, as: :exceptions_count
       expose :message do |fault, options|
         fault.app_exceptions.try(:first).try(:message)

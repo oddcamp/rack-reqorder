@@ -10,6 +10,8 @@ module Rack::Reqorder::Models
 
     field :resolved, type: Boolean, default: false
 
+    field :environment, type: String
+
     field :app_exceptions_count, type: Integer, default: 0
 
     belongs_to :route_path, dependent: :nullify

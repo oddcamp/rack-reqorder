@@ -99,14 +99,14 @@ module Rack
         rack_app.routes.each do |route|
           route_options = route.instance_variable_get(:@options)
           if route_options[:method] == options[:method] && route_options[:compiled] =~ path_uri
-           # if route_options[:method] == "OPTIONS"
-           #   return route_options[:path].
-           #     gsub('(.json)', '')
-           # else
-              return route_options[:path].
-                gsub(':version', route_options[:version]).
-                gsub('(.json)', '')
-           # end
+           if route_options[:method] == "OPTIONS"
+             return route_options[:path].
+               gsub('(.json)', '')
+           else
+             return route_options[:path].
+               gsub(':version', route_options[:version]).
+               gsub('(.json)', '')
+           end
           end
         end
 
