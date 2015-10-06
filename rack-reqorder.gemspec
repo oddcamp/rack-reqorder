@@ -6,12 +6,12 @@ require 'rack/reqorder/version'
 Gem::Specification.new do |spec|
   spec.name          = "rack-reqorder"
   spec.version       = Rack::Reqorder::VERSION
-  spec.authors       = ["Filippos Vasilakis"]
-  spec.email         = ["vasilakisfil@gmail.com"]
+  spec.authors       = ["Filippos Vasilakis", "Kollegorna"]
+  spec.email         = ["vasilakisfil@gmail.com", "admin@kollegorna.se"]
 
   spec.summary       = %q{Request recorder and analyzer for rack apps}
   spec.description   = %q{Request recorder and analyzer for rack apps}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/kollegorna/rack-reqorder"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
