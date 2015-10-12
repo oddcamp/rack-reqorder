@@ -3,7 +3,6 @@ require 'grape-entity'
 require 'rack/reqorder/monitor/helpers'
 require 'rack/reqorder/monitor/entities'
 require 'mongoid_hash_query'
-require 'pry'
 
 module Rack::Reqorder
   module Monitor
@@ -137,6 +136,8 @@ module Rack::Reqorder::Monitor
       get do
         faults = AppFault.all
 
+        environments = faults.group_by(&:environment).keys
+
         faults = apply_filters(faults, params)
 
         meta_aggregations = aggregations(faults, params)
@@ -146,7 +147,7 @@ module Rack::Reqorder::Monitor
         present_with_meta(
           faults,
           present(faults, with: FaultEntity),
-          meta_aggregations
+          meta_aggregations.merge(environments: environments)
         )
       end
 

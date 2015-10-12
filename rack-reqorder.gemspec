@@ -24,11 +24,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "factory_girl", "~> 4.0"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "faker"
-  spec.add_dependency "mongoid", "~> 4.0.0"
+  spec.add_dependency "mongoid", "> 4.0.0"
   spec.add_dependency "activesupport", ">4.0.0"
   spec.add_dependency "grape"
   spec.add_dependency "grape-entity"
   spec.add_dependency "kaminari"
   spec.add_dependency "rack-cors"
-  spec.add_dependency "mongoid_hash_query", "~> 0.2.4"
+  spec.add_dependency "mongoid_hash_query", "> 0.2.4"
 end

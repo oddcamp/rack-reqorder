@@ -7,6 +7,7 @@ if respond_to?(:namespace, true)
 
       require_relative '../../../../spec/rack/factories/statistics.rb'
       require_relative '../../../../spec/rack/factories/route_paths.rb'
+      require_relative '../../../../spec/rack/factories/app_faults.rb'
 
       10.times { FactoryGirl.create(:route_path) }
 
@@ -21,6 +22,8 @@ if respond_to?(:namespace, true)
         route: '/rack-reqorder/api/v1/route_paths',
         http_method: 'GET'
       )
+
+      40.times { FactoryGirl.create(:app_fault) }
     end
   end
 end

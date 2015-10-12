@@ -57,10 +57,10 @@ module Rack::Reqorder
         http_method: rack_request.request_method
       })
 
-      [:all.to_s, DateTime.now.hour.to_s].each do |key|
+      [:all.to_s, DateTime.now.utc.hour.to_s].each do |key|
         statistic = route_path.send("statistic_#{key}".to_sym)
 
-        if key != :all && statistic && statistic.created_at.to_date < DateTime.now.to_date
+        if key != :all && statistic && statistic.created_at.to_date < DateTime.now.utc.to_date
           statistic = route_path.send("create_statistic_#{key}")
         end
 

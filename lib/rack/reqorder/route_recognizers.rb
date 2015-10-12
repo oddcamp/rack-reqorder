@@ -11,17 +11,17 @@ module Rack
           next unless __superclass
 
           case __superclass.to_s
-          when Sinatra::Base.to_s
+          when 'Sinatra::Base'
             @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
               search_method: :sinatra_recognize_path,
               rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app
             }
-          when Rails::Engine.to_s
+          when 'Rails::Engine'
             @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
               search_method: :rails_recognize_path,
               rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app
             }
-          when Grape::API.to_s
+          when 'Grape::API'
             @prefixes[route.path.spec.try(:left).to_s + route.path.spec.try(:right).to_s] = {
               search_method: :grape_recognize_path,
               rack_app: route.app.try(:superclass).nil? ? route.app.app : route.app

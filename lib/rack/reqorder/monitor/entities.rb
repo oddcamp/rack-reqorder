@@ -57,14 +57,30 @@ module Rack::Reqorder::Monitor
       exposures = proc{|aggrs, field|
         aggrs.each do |aggr|
           expose aggr do |route_path, options|
-            array = []
-            0.upto(23) do |i|
-              array << route_path[:items].where(
-                "statistic_#{i}.created_at".to_sym.gte => DateTime.now.to_date
-              ).send(aggr,("statistic_#{i}.#{field}"))
+            today_array = []
+            yesterday_array = []
+
+            now = DateTime.now.utc.hour
+
+            0.upto(now) do |i|
+              today_array.push(
+                route_path[:items].where(
+                  "statistic_#{i}.created_at".to_sym.gte => DateTime.now.utc.to_date
+                ).send(aggr,("statistic_#{i}.#{field}"))
+              )
             end
 
-            array
+            if now <23
+              (now+1).upto(23) do |i|
+                yesterday_array.push(
+                  route_path[:items].where(
+                    "statistic_#{i}.created_at".to_sym.gte => (DateTime.now.utc.to_date - 1)
+                  ).send(aggr,("statistic_#{i}.#{field}"))
+                )
+              end
+            end
+
+            [yesterday_array,today_array].flatten
           end
         end
       }
@@ -137,8 +153,9 @@ module Rack::Reqorder::Monitor
       expose :filepath
       expose :resolved
       expose :app_exceptions_count, as: :exceptions_count
+      expose :environment
       expose :message do |fault, options|
-        fault.app_exceptions.try(:first).try(:message)
+        fault.app_exceptions.try(:last).try(:message)
       end
 
       expose :app_exception_ids, as: :exception_ids do |fault, options|
