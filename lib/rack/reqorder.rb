@@ -39,13 +39,20 @@ module Rack
         end
 
         if environment.blank?
-          puts 'rack-reqorder: No environment found, assuming development environment'
-          self.environment = :development
+          self.environment = app_environment
         end
 
         self.auth_email = 'admin@example.com' if auth_email.blank?
         self.auth_password = 'password' if auth_password.blank?
         self.no_auth = false if self.no_auth.blank?
+      end
+
+      def app_environment
+        if Module.const_defined?(:Rails)
+          return Rails.env
+        else
+          return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'staging'
+        end
       end
     end
   end
