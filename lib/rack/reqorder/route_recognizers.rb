@@ -35,7 +35,11 @@ module Rack
       def rails_paths(rails_app)
         paths = {}
         rails_app.routes.routes.routes.reverse.each do |route|
-          paths[route.defaults] = route.path.spec.to_s.gsub('(.:format)', '')
+          route_key = route.defaults.select do
+            |key, value| [:action, :controller].include?(key)
+          end
+
+          paths[route_key] = route.path.spec.to_s.gsub('(.:format)', '')
         end
 
         return paths
