@@ -19,11 +19,13 @@ module Rack::Reqorder
       ensure
         response_time = Time.now.to_f - start
 
-        save_statistics(
-          rack_request: rack_request,
-          rack_response: response,
-          response_time: response_time
-        )
+        if response
+          save_statistics(
+            rack_request: rack_request,
+            rack_response: response,
+            response_time: response_time
+          )
+        end
       end
 
       return [status, headers, body]
