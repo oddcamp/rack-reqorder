@@ -62,7 +62,7 @@ module Rack::Reqorder
       [:all.to_s, DateTime.now.utc.hour.to_s].each do |key|
         statistic = route_path.send("statistic_#{key}".to_sym)
 
-        if key != :all && statistic && statistic.created_at.to_date < DateTime.now.utc.to_date
+        if key != :all.to_s && statistic && statistic.created_at.to_date < DateTime.now.utc.to_date
           statistic = route_path.send("create_statistic_#{key}")
         end
 
@@ -147,7 +147,6 @@ module Rack::Reqorder
         e_class: exception.class,
         line: line.to_i,
         filepath: path[1..-1],
-        route_path: http_request.route_path,
         environment: app_environment
       )
 

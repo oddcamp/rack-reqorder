@@ -14,7 +14,5 @@ module Rack::Reqorder::Models
     0.upto(23) do |i|
       embeds_one "statistic_#{i}", class_name: 'Rack::Reqorder::Models::Statistic'
     end
-
-    has_one :app_fault, dependent: :destroy
   end
 end

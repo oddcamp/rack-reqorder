@@ -14,7 +14,6 @@ module Rack::Reqorder::Models
 
     field :app_exceptions_count, type: Integer, default: 0
 
-    belongs_to :route_path, dependent: :nullify
     has_many :app_exceptions, dependent: :destroy
 
     def update_count!
