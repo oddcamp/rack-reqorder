@@ -51,7 +51,7 @@ module Rack::Reqorder::Monitor
     end
 
     class RoutePath24StatisticsEntity < Grape::Entity
-      root :route_path_25_statistics
+      root :route_path_24_statistics
       present_collection true
 
       exposures = proc{|aggrs, field|
@@ -160,10 +160,6 @@ module Rack::Reqorder::Monitor
 
       expose :app_exception_ids, as: :exception_ids do |fault, options|
         fault.app_exception_ids.map(&:to_s).first(100)
-      end
-
-      with_options(format_with: :association_id) do
-        expose :route_path, as: :route_path_id
       end
 
       with_options(format_with: :iso_timestamp) do
