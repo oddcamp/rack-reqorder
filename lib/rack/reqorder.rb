@@ -2,6 +2,7 @@ require 'rack/reqorder/version'
 require 'active_support/inflector'
 require 'mongoid'
 require 'kaminari'
+require 'rack/cors'
 require 'kaminari/models/mongoid_extension'
 require 'rack/reqorder/route_recognizers'
 
@@ -31,7 +32,7 @@ module Rack
 
     class Configuration
       attr_accessor :mongoid_yml, :environment, :auth_email, :auth_password,
-        :no_auth
+        :no_auth, :metrics_monitoring, :exception_monitoring, :request_monitoring
 
       def validate!
         if mongoid_yml.blank?
@@ -42,17 +43,23 @@ module Rack
           self.environment = app_environment
         end
 
-        self.auth_email = 'admin@example.com' if auth_email.blank?
-        self.auth_password = 'password' if auth_password.blank?
-        self.no_auth = false if self.no_auth.blank?
       end
 
       def app_environment
         if Module.const_defined?(:Rails)
           return Rails.env
         else
-          return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'staging'
+          return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'unknown'
         end
+      end
+
+      def initialize
+        self.auth_email = 'admin@example.com' if auth_email.blank?
+        self.auth_password = 'password' if auth_password.blank?
+        self.no_auth = false if self.no_auth.blank?
+        self.metrics_monitoring = true if self.metrics_monitoring.blank?
+        self.exception_monitoring = true if self.exception_monitoring.blank?
+        self.request_monitoring = true if self.request_monitoring.blank?
       end
     end
   end
@@ -75,9 +82,9 @@ require 'rack/reqorder/models/route_path'
 require 'rack/reqorder/models/http_response'
 require 'rack/reqorder/models/app_fault'
 require 'rack/reqorder/models/app_exception'
+require 'rack/reqorder/models/recording'
 require 'rack/reqorder/services/backtrace_cleaner'
 require 'rack/reqorder/logger'
 require 'rack/reqorder/monitor'
 
 load 'rack/reqorder/tasks/routes.rake'
-load 'rack/reqorder/tasks/test_database.rake'

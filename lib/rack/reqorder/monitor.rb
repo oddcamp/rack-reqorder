@@ -24,11 +24,9 @@ module Rack::Reqorder::Monitor
     format :json
     prefix :api
 
-=begin
     rescue_from Grape::Exceptions::ValidationErrors do |e|
       error!({errors: e.send(:full_messages)}, 422)
     end
-=end
 
     #collection routes
     resource :route_paths do
@@ -198,6 +196,57 @@ module Rack::Reqorder::Monitor
       route_param :id do
         get do
           present(AppException.find(params[:id]), with: ExceptionEntity)
+        end
+      end
+    end
+
+    #collection routes
+    resource :recordings do
+      before do
+        authorize_user!(headers) unless Rack::Reqorder.configuration.no_auth
+      end
+
+      get do
+        recordings = apply_filters(Recording.all, params)
+
+        meta_aggregations = aggregations(recordings, params)
+
+        recordings = paginate(recordings, params)
+
+        present_with_meta(
+          recordings,
+          present(recordings, with: RecordingEntity),
+          meta_aggregations
+        )
+      end
+
+      params do
+        requires :recording, type: Hash do
+          requires :http_header, type: String
+          requires :http_header_value, type: String
+        end
+      end
+      post do
+        present(
+          Recording.create!({
+            http_header: declared(params)[:recording][:http_header],
+            http_header_value: declared(params)[:recording][:http_header_value]
+          }),
+          with: RecordingEntity
+        )
+      end
+
+      #element routes
+      route_param :id do
+        get do
+          present(Recording.find(params[:id]), with: RecordingEntity)
+        end
+
+        delete do
+          recording = Recording.find(params[:id])
+          recording.destroy
+
+          present(recording, with: RecordingEntity)
         end
       end
     end

@@ -9,33 +9,57 @@ module Rack::Reqorder
     def call(environment)
       rack_request = Rack::Request.new(environment.clone)
 
+      http_request = record_request(rack_request) if conf.request_monitoring
+
       start = Time.now.to_f
       begin
         status, headers, body = @app.call(environment)
-        response = Rack::Response.new(body, status, headers)
+        rack_response = Rack::Response.new(body, status, headers)
       rescue => exception
-        response = log_exception(exception, environment)
+        rack_response = log_exception(exception, rack_request) if conf.exception_monitoring
+
         raise exception
       ensure
-        response_time = Time.now.to_f - start
-
-        if response
-          save_statistics(
-            rack_request: rack_request,
-            rack_response: response,
-            response_time: response_time
-          )
-        end
+        record_statistics(rack_request, rack_response, Time.now.to_f - start)
       end
+      record_response(rack_response, http_request) if conf.request_monitoring
 
       return [status, headers, body]
     end
 
   private
+    def record_statistics(rack_request, rack_response, response_time)
+      if rack_response && conf.metrics_monitoring
+        save_statistics(
+          rack_request: rack_request,
+          rack_response: rack_response,
+          response_time: response_time
+        )
+      end
+    end
 
-    def extract_all_headers(request)
+    def record_request(rack_request)
+      request_headers = extract_all_headers(rack_request.env)
+      recording = nil
+
+      Recording.enabled.all.each do |rec|
+        if request_headers[rec.http_header] == rec.http_header_value
+          recording = rec and break
+        end
+      end
+
+      return save_http_request(rack_request, recording)
+    end
+
+    def record_response(rack_response, http_request)
+      if http_request && http_request.recording
+        return save_http_response(rack_response, http_request)
+      end
+    end
+
+    def extract_all_headers(env)
       Hash[
-        request.env.select{|k,v|
+        env.select{|k,v|
           k.start_with? 'HTTP_'
         }.map{|k,v|
           [k.gsub('HTTP_','').upcase, v]
@@ -90,44 +114,46 @@ module Rack::Reqorder
       end
     end
 
-    def save_http_request(environment)
-      request = Rack::Request.new(environment)
 
-      route_path = RoutePath.find_or_create_by({
-        route: Rack::Reqorder.recognize_path(request.path),
-        http_method: request.request_method
-      })
+    def save_http_request(rack_request, recording = nil)
+      if not recording
+        route_path = RoutePath.find_or_create_by({
+          route: Rack::Reqorder.recognize_path(rack_request.path),
+          http_method: rack_request.request_method
+        })
+      end
 
       HttpRequest.create({
-        ip: request.ip,
-        url: request.url,
-        scheme: request.scheme,
-        base_url: request.base_url,
-        port: request.port,
-        path: request.path,
-        full_path: request.fullpath,
-        http_method: request.request_method,
-        headers: extract_all_headers(request),
-        params: request.params,
-        ssl: request.ssl?,
-        xhr: request.xhr?,
-        route_path: route_path
+        ip: rack_request.ip,
+        url: rack_request.url,
+        scheme: rack_request.scheme,
+        base_url: rack_request.base_url,
+        port: rack_request.port,
+        path: rack_request.path,
+        full_path: rack_request.fullpath,
+        http_method: rack_request.request_method,
+        headers: extract_all_headers(rack_request.env),
+        params: rack_request.params,
+        ssl: rack_request.ssl?,
+        xhr: rack_request.xhr?,
+        route_path: recording ? nil : route_path,
+        recording: recording ? recording : nil
       })
     end
 
-    def save_http_response(body, status, headers, http_request)
-      response = Rack::Response.new(body, status, headers)
-
+    def save_http_response(rack_response, http_request)
       HttpResponse.create(
-        headers: response.headers,
-        #body: response.body.first,
-        status: response.status.to_i,
-        http_request: http_request
+        headers: rack_response.headers,
+        body: rack_response.body.first,
+        status: rack_response.status.to_i,
+        length: rack_response.length,
+        http_request: http_request,
+        recording: http_request.recording.nil? ? nil : http_request.recording
       )
     end
 
-    def log_exception(exception, environment)
-      http_request = save_http_request(environment)
+    def log_exception(exception, rack_request)
+      http_request = save_http_request(rack_request)
 
       bc = BacktraceCleaner.new
       bc.add_filter   { |line| line.gsub(Rails.root.to_s, '') }
@@ -147,7 +173,7 @@ module Rack::Reqorder
         e_class: exception.class,
         line: line.to_i,
         filepath: path[1..-1],
-        environment: app_environment
+        environment: conf.environment
       )
 
       AppException.create(
@@ -181,12 +207,8 @@ module Rack::Reqorder
       end
     end
 
-    def app_environment
-      if Module.const_defined?(:Rails)
-        return Rails.env
-      else
-        return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'unknown'
-      end
+    def conf
+      Rack::Reqorder.configuration
     end
   end
 end

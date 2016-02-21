@@ -4,11 +4,17 @@ Simple gem for monitoring Rack apps. Uses MongoDB. It can be used in combination
 with [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor).
 
 ## Introduction
-Simple gem that sits on top of Rack and records request/response statistics
-as well as monitors for exceptions. It saves everything in MongoDB and exposes
-a simple API for retrieving these data.
+Simple gem that sits on top of Rack and can:
+
+- monitors for exceptions
+- record full requests/responses, based on a header
+- record request/response statistics
+
+It saves everything in MongoDB and exposes simple API for retrieving these data.
 
 The API is very robust, built with the help of [mongoid_hash_query](https://github.com/kollegorna/mongoid_hash_query).
+
+A simple, default, dashboard is build in ember can be found [here](https://github.com/kollegorna/rack-reqorder-monitor).
 
 ## Installation
 
@@ -50,7 +56,7 @@ Rails.application.config.middleware.insert_after(ActionDispatch::DebugExceptions
 Rails.application.config.middleware.insert_before 0, "Rack::Cors" do
   allow do
     origins '*'
-    resource '*', :headers => :any, :methods => [:get, :post, :options]
+    resource '*', :headers => :any, :methods => [:get, :post, :put, :delete, :options]
   end
 end
 ```
