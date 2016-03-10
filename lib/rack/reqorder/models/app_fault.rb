@@ -8,6 +8,8 @@ module Rack::Reqorder::Models
     field :line, type: Integer
     field :filepath, type: String
 
+    field :last_seen_at, type: Time
+
     field :resolved, type: Boolean, default: false
 
     field :environment, type: String
@@ -18,7 +20,9 @@ module Rack::Reqorder::Models
 
     def update_count!
       self.app_exceptions_count = self.app_exceptions.count
+      self.last_seen_at = DateTime.now
       self.save!
     end
+
   end
 end

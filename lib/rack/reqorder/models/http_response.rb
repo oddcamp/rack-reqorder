@@ -6,10 +6,12 @@ module Rack::Reqorder::Models
 
     field :headers, type: Hash
     field :status, type: Integer
-    #field :body, type: String
+    field :body, type: String
+    field :length, type: Integer
     field :response_time, type: Float
 
     belongs_to :http_request, dependent: :nullify
+    belongs_to :recording, dependent: :nullify
 
     before_create :set_response_time
     after_create :set_response_time_to_request

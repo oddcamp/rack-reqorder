@@ -124,6 +124,7 @@ module Rack::Reqorder::Monitor
 
       with_options(format_with: :association_id) do
         expose :http_response, as: :response_id
+        expose :recording, as: :recording_id
       end
 
     end
@@ -133,6 +134,7 @@ module Rack::Reqorder::Monitor
 
       expose :headers
       expose :status
+      expose :body
       expose :response_time
 
       with_options(format_with: :iso_timestamp) do
@@ -142,6 +144,7 @@ module Rack::Reqorder::Monitor
 
       with_options(format_with: :association_id) do
         expose :http_request, as: :request_id
+        expose :recording, as: :recording_id
       end
     end
 
@@ -163,6 +166,7 @@ module Rack::Reqorder::Monitor
       end
 
       with_options(format_with: :iso_timestamp) do
+        expose :last_seen_at
         expose :created_at
         expose :updated_at
       end
@@ -187,7 +191,20 @@ module Rack::Reqorder::Monitor
         expose :http_request, as: :request_id
         expose :app_fault, as: :fault_id
       end
+    end
 
+    class RecordingEntity < BaseEntity
+      root :recordings, :recording
+
+      expose :http_header
+      expose :http_header_value
+      expose :enabled
+      expose :requests_count
+
+      with_options(format_with: :iso_timestamp) do
+        expose :created_at
+        expose :updated_at
+      end
     end
 
     class SessionEntity < Grape::Entity
