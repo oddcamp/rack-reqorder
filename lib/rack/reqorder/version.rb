@@ -1,5 +1,5 @@
 module Rack
   module Reqorder
-    VERSION = "0.4.8"
+    VERSION = "0.5"
   end
 end
