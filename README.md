@@ -16,6 +16,9 @@ The API is very robust, built with the help of [mongoid_hash_query](https://gith
 
 A simple, default, dashboard is build in ember can be found [here](https://github.com/kollegorna/rack-reqorder-monitor).
 
+At the moment, Rails, Sinatra and Grape are supported.
+We are looking forward to add support for Hanami (ex-lotus)
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -50,20 +53,16 @@ end
 
 Rack::Reqorder.boot!
 
+#if you run on development mode
 Rails.application.config.middleware.insert_after(ActionDispatch::DebugExceptions , Rack::Reqorder::Logger)
-
-#rack-cors also needed
-Rails.application.config.middleware.insert_before 0, "Rack::Cors" do
-  allow do
-    origins '*'
-    resource '*', :headers => :any, :methods => [:get, :post, :put, :delete, :options]
-  end
-end
+#or if run on production
+#Rails.application.config.middleware.insert_after(0, Rack::Reqorder::Logger)
 ```
-Please note that you can configure origins and resource depending on how you
-mount the rack-monitor engine and where you deploy your front-end.
-
-For viewing your statistics please check [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor)
+Then in routes.rb enable the API for the [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor).
+```ruby
+  require 'rack/reqorder/monitor'
+  mount Rack::Reqorder::Monitor::Api => '/rack-reqorder'
+```
 
 ## Development
 
@@ -73,7 +72,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/rack-reqorder/fork )
+1. Fork it ( https://github.com/kollegorna/rack-reqorder/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

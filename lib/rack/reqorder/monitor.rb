@@ -28,6 +28,11 @@ module Rack::Reqorder::Monitor
       error!({errors: e.send(:full_messages)}, 422)
     end
 
+    before do
+      header 'Access-Control-Allow-Origin', '*'
+      header 'Access-Control-Allow-Methods', '*'
+    end
+
     #collection routes
     resource :route_paths do
       before do
@@ -45,6 +50,15 @@ module Rack::Reqorder::Monitor
           route_paths,
           present(route_paths, with: RoutePathEntity),
           meta_aggregations
+        )
+      end
+
+      delete do
+        route_paths = RoutePath.delete_all
+
+        present_with_meta(
+          route_paths,
+          present(route_paths, with: RoutePathEntity)
         )
       end
 
@@ -87,6 +101,15 @@ module Rack::Reqorder::Monitor
         )
       end
 
+      delete do
+        requests = HttpRequest.delete_all
+
+        present_with_meta(
+          requests,
+          present(requests, with: RequestEntity)
+        )
+      end
+
       #element routes
       route_param :id do
         get do
@@ -114,6 +137,15 @@ module Rack::Reqorder::Monitor
           responses,
           present(responses, with: ResponseEntity),
           meta_aggregations
+        )
+      end
+
+      delete do
+        responses = HttpResponse.delete_all
+
+        present_with_meta(
+          responses,
+          present(responses, with: ResponseEntity)
         )
       end
 
@@ -147,6 +179,16 @@ module Rack::Reqorder::Monitor
           present(faults, with: FaultEntity),
           meta_aggregations.merge(environments: environments)
         )
+      end
+
+      delete do
+        faults = AppFault.delete_all
+
+        present_with_meta(
+          faults,
+          present(faults, with: FaultEntity)
+        )
+
       end
 
       #element routes
@@ -189,6 +231,15 @@ module Rack::Reqorder::Monitor
           exceptions,
           present(exceptions, with: ExceptionEntity),
           meta_aggregations
+        )
+      end
+
+      delete do
+        exceptions = AppException.delete_all
+
+        present_with_meta(
+          exceptions,
+          present(exceptions, with: ExceptionEntity)
         )
       end
 
@@ -250,7 +301,6 @@ module Rack::Reqorder::Monitor
         end
       end
     end
-
 
     params do
       requires :user, type: Hash do
