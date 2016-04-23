@@ -1,7 +1,7 @@
 require 'rack/reqorder/version'
 require 'active_support/inflector'
 require 'mongoid'
-require 'kaminari'
+require 'kaminari/grape'
 require 'rack/cors'
 require 'kaminari/models/mongoid_extension'
 require 'rack/reqorder/route_recognizers'
@@ -49,7 +49,7 @@ module Rack
         if Module.const_defined?(:Rails)
           return Rails.env
         else
-          return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'unknown'
+          return ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
         end
       end
 
