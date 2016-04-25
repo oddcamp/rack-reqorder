@@ -30,7 +30,8 @@ module Rack::Reqorder::Monitor
 
     before do
       header 'Access-Control-Allow-Origin', '*'
-      header 'Access-Control-Allow-Methods', '*'
+      header 'Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD'
+      header 'Access-Control-Allow-Headers', 'Content-Type'
     end
 
     #collection routes

@@ -6,8 +6,8 @@ with [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor
 ## Introduction
 Simple gem that sits on top of Rack and can:
 
-- monitors for exceptions
-- record full requests/responses, based on a header
+- monitors for exceptions and provides full details, like where it happened as well as the request details
+- record full requests/responses timelined, based on a header
 - record request/response statistics
 
 It saves everything in MongoDB and exposes simple API for retrieving these data.
@@ -17,7 +17,7 @@ The API is very robust, built with the help of [mongoid_hash_query](https://gith
 A simple, default, dashboard is build in ember can be found [here](https://github.com/kollegorna/rack-reqorder-monitor).
 
 At the moment, Rails, Sinatra and Grape are supported.
-We are looking forward to add support for Hanami (ex-lotus)
+We are looking forward to add support for Hanami (ex-Lotus).
 
 ## Installation
 
