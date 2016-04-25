@@ -10,7 +10,7 @@ FactoryGirl.define do
     xhr_count { http_requests_count - rand(9000..10000) }
     ssl_count { http_requests_count - rand(1000..2000) }
 
-    created_at { 1.day.ago }
-    updated_at { 1.day.ago }
+    created_at { rand(0..1440).minutes.ago }
+    updated_at { rand(0..1440).minutes.ago }
   end
 end

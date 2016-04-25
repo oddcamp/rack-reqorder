@@ -9,3 +9,4 @@
 /tmp/
 mongoid.yml
 *.gem
+lib/rack/reqorder/tasks/test.rake

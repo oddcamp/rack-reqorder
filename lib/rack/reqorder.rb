@@ -16,6 +16,17 @@ module Rack
       attr_accessor :configuration
     end
 
+    def self.clean_database!
+      [
+        :AppException, :AppFault, :HttpRequest, :HttpResponse, :Recording,
+        :RoutePath, :Statistic
+      ].each do |model|
+        Object.const_get("#{self}::Models::#{model.to_s}").delete_all
+      end
+
+      return true
+    end
+
     def self.configure
       self.configuration ||= Configuration.new
       yield(configuration)
