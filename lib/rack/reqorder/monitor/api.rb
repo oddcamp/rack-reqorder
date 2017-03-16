@@ -1,23 +1,26 @@
 require 'grape'
 require 'grape-entity'
-require 'rack/reqorder/monitor/helpers'
-require 'rack/reqorder/monitor/entities'
 require 'mongoid_hash_query'
 
 module Rack::Reqorder
   module Monitor
+    module Api
+    end
   end
 end
 
-module Rack::Reqorder::Monitor
+require 'rack/reqorder/monitor/api/helpers'
+require 'rack/reqorder/monitor/api/entities'
+
+module Rack::Reqorder::Monitor::Api
 
   class Api < Grape::API
     include Rack::Reqorder::Models
-    include Rack::Reqorder::Monitor::Entities
+    include Rack::Reqorder::Monitor::Api::Entities
 
     helpers do
       include MongoidHashQuery
-      include Rack::Reqorder::Monitor::Helpers
+      include Rack::Reqorder::Monitor::Api::Helpers
     end
 
     version 'v1', using: :path, vendor: 'foobar'

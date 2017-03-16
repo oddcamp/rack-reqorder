@@ -3,7 +3,6 @@
 module Rack::Reqorder::Models
   class AppException
     include ::Mongoid::Document
-    include ::Kaminari::MongoidExtension::Document
     include ::Mongoid::Timestamps
 
     field :e_class, type: String
@@ -15,8 +14,8 @@ module Rack::Reqorder::Models
     field :filepath, type: String
     field :source_extract, type: Hash
 
-    belongs_to :http_request, dependent: :nullify
-    belongs_to :app_fault, dependent: :nullify
+    belongs_to :http_request, {dependent: :nullify}.merge(REQUIRED)
+    belongs_to :app_fault, {dependent: :nullify}.merge(REQUIRED)
 
     after_save :update_count
 

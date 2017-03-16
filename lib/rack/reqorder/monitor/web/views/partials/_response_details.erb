@@ -1,0 +1,34 @@
+<table class="table">
+  <tr>
+    <th> Response Details </th>
+    <th>Headers</th>
+    <td>
+      <table>
+        <% response.headers.each do |header, value| %>
+          <tr>
+            <th><%= header %></th>
+            <td><%= value %></td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Status</th>
+    <td><%= response.status %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Body</th>
+    <td><%= response.body %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Response Time</th>
+    <td><%= response.response_time %></td>
+  </tr>
+</table>

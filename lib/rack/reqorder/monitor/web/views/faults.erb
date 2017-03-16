@@ -1,0 +1,52 @@
+<% if exception_monitoring %>
+  <div class="row">
+    <div class="col">
+      <table class="table center-table">
+        <thead>
+          <tr>
+            <th><strong>Error</strong></th>
+            <th><strong>Last Seen</strong></th>
+            <th><strong>Times</strong></th>
+            <th><strong>Environment</strong></th>
+            <th><strong>Resolved</strong></th>
+            <th><strong>Action</strong></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% faults.each do |fault| %>
+            <tr>
+              <td>
+                <a href=<%= pathy("errors/#{fault.id}") %>><%= fault.e_class %></a> <br>
+                <pre class="pre-inline"><%= fault.message %></pre> in <pre class="pre-inline"><%= fault.filepath %>:<%= fault.line %></pre>
+              </td>
+              <td><%= fault.last_seen_at %></td>
+              <td><%= fault.app_exceptions_count %></td>
+              <td><%= fault.environment %></td>
+              <% if fault.resolved %>
+                <td>Resolved</td>
+              <% else %>
+                <td>Unresolved</td>
+              <% end %>
+              <td>
+                <%= erb :'partials/_fault_actions', locals: {fault: fault, redirect_to: :index} %>
+              </td>
+            </tr>
+          <% end.empty? and begin %>
+            <tr>
+              <td colspan="4" class="no-errors">No errors</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <div class="row justify-content-md-center">
+    <div class="col-md-auto">
+      <form action=<%= pathy('/configuration?exception=true&redirect_to=errors')%> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Enable Exception Monitoring</button>
+      </form>
+    </div>
+  </div>
+<% end %>

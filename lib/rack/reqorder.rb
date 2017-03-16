@@ -1,9 +1,9 @@
+require 'pry'
 require 'rack/reqorder/version'
 require 'active_support/inflector'
 require 'mongoid'
-require 'kaminari/grape'
 require 'rack/cors'
-require 'kaminari/models/mongoid_extension'
+#require 'kaminari/models/mongoid_extension'
 require 'rack/reqorder/route_recognizers'
 
 module Rack
@@ -42,8 +42,7 @@ module Rack
     end
 
     class Configuration
-      attr_accessor :mongoid_yml, :environment, :auth_email, :auth_password,
-        :no_auth, :metrics_monitoring, :exception_monitoring, :request_monitoring
+      attr_accessor :mongoid_yml, :environment
 
       def validate!
         if mongoid_yml.blank?
@@ -51,12 +50,12 @@ module Rack
         end
 
         if environment.blank?
-          self.environment = app_environment
+          self.environment = default_environment
         end
 
       end
 
-      def app_environment
+      def default_environment
         if Module.const_defined?(:Rails)
           return Rails.env
         else
@@ -64,38 +63,30 @@ module Rack
         end
       end
 
-      def initialize
-        self.auth_email = 'admin@example.com' if auth_email.blank?
-        self.auth_password = 'password' if auth_password.blank?
-        self.no_auth = false if self.no_auth.blank?
-        self.metrics_monitoring = true if self.metrics_monitoring.blank?
-        self.exception_monitoring = true if self.exception_monitoring.blank?
-        self.request_monitoring = true if self.request_monitoring.blank?
+      def metrics_monitoring
+        config.metrics_monitoring
+      end
+
+      def exception_monitoring
+        config.exception_monitoring
+      end
+
+      def request_monitoring
+        config.request_monitoring
+      end
+
+      def config
+        Models::Configuration.first_or_create
       end
     end
   end
 end
 
-Kaminari.configure do |config|
-  # config.default_per_page = 25
-  # config.max_per_page = nil
-  # config.window = 4
-  # config.outer_window = 0
-  # config.left = 0
-  # config.right = 0
-  # config.page_method_name = :page
-  # config.param_name = :page
-end
-
-require 'rack/reqorder/models/statistic'
-require 'rack/reqorder/models/http_request'
-require 'rack/reqorder/models/route_path'
-require 'rack/reqorder/models/http_response'
-require 'rack/reqorder/models/app_fault'
-require 'rack/reqorder/models/app_exception'
-require 'rack/reqorder/models/recording'
+require 'rack/reqorder/models'
 require 'rack/reqorder/services/backtrace_cleaner'
 require 'rack/reqorder/logger'
-require 'rack/reqorder/monitor'
+
+#require 'rack/reqorder/monitor/api'
+require 'rack/reqorder/monitor/web'
 
 load 'rack/reqorder/tasks/routes.rake'

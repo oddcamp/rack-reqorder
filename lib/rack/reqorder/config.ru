@@ -6,4 +6,4 @@ end
 
 Rack::Reqorder.boot!
 
-run Rack::Reqorder::Monitor::Api
+run Rack::Reqorder::Monitor::Web::Application

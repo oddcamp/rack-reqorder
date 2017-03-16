@@ -1,0 +1,66 @@
+<div class="row">
+  <div class="col">
+    <table class="table center-table">
+      <thead>
+        <tr>
+          <th ><strong>Recording Details</strong></th>
+          <th><strong>Http Header</strong></th>
+          <th><strong>Value</strong></th>
+          <th><strong>Enabled</strong></th>
+          <th><strong>Requests count</strong></th>
+          <th><strong>Action</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td><%= recording.http_header %></td>
+          <td><%= recording.http_header_value %></td>
+          <td>
+            <% if recording.enabled %>
+              Enabled
+            <% else %>
+              Disabled
+            <% end %>
+          </td>
+          <td><%= recording.requests_count %></td>
+          <td>
+            <%= erb :'partials/_recording_actions', locals: {recording: recording, redirect_to: {delete: :index, clear: :resource}} %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<br>
+
+<% if recording.http_requests.to_a.empty? %>
+  <p class="text-center"> No requests! </p>
+<% else %>
+  <div class="row">
+    <div class="col">
+        <table class="table center-table">
+          <thead>
+            <tr>
+              <th><strong>Requests</strong></th>
+              <th><strong>ID</strong></th>
+              <th><strong>HTTP Method</strong></th>
+              <th><strong>Path</strong></th>
+              <th><strong>Created At</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recording.http_requests.order_by(updated_at: :desc).to_a.each do |request| %>
+              <tr>
+                <td></td>
+                <td><a href=<%= pathy("/requests/#{request.id}") %>><%= request.id %> </a></td>
+                <td><%= request.http_method %></td>
+                <td style="width: 30%;"><a href=<%= request.url %>><%= request.url %></a></td>
+                <td><%= request.created_at %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+    </div>
+  </div>
+<% end %>

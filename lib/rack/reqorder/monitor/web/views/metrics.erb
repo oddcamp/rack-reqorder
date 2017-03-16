@@ -1,0 +1,99 @@
+<% if metrics_monitoring %>
+  <div class="row">
+    <div class="col">
+      <table class="table center-table table-bordered">
+        <thead>
+          <tr>
+            <th class="float-left"><strong>Total Metrics</strong></th>
+            <th><strong>Total Requests</strong></th>
+            <th><strong>Avg Response Time</strong></th>
+            <th><strong>2xx</strong></th>
+            <th><strong>3xx</strong></th>
+            <th><strong>4xx</strong></th>
+            <th><strong>401</strong></th>
+            <th><strong>404</strong></th>
+            <th><strong>422</strong></th>
+            <th><strong>XHR</strong></th>
+            <th><strong>SSL</strong></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td><%= total_metrics.http_requests_count%></td>
+            <td><%= total_metrics.avg_response_time%></td>
+            <td><%= total_metrics.statuses_2xx %></td>
+            <td><%= total_metrics.statuses_3xx %></td>
+            <td><%= total_metrics.statuses_4xx %></td>
+            <td><%= total_metrics.statuses_401 %></td>
+            <td><%= total_metrics.statuses_404 %></td>
+            <td><%= total_metrics.statuses_422 %></td>
+            <td><%= total_metrics.statuses_XHR %></td>
+            <td><%= total_metrics.statuses_SSL %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <table class="table center-table table-bordered">
+        <thead>
+          <tr>
+            <th class="float-left"><strong>Slow Endpoints</strong></th>
+            <th><strong>Route</strong></th>
+            <th><strong>Number of requests</strong></th>
+            <th><strong>Average response time (seconds)</strong></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% slow_route_paths.each do |route_path| %>
+            <tr>
+              <td></td>
+              <td><%= route_path.http_method%> <%= route_path.route %></td>
+              <td><%= route_path.statistic_all.http_requests_count %></td>
+              <td><%= route_path.statistic_all.avg_response_time %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col">
+
+      <h2> Popular endpoints </h2>
+      <table class="table center-table table-bordered">
+        <thead>
+          <tr>
+            <th class="float-left"><strong>Popular Endpoints</strong></th>
+            <th><strong>Route</strong></th>
+            <th><strong>Number of requests</strong></th>
+            <th><strong>Average response time (seconds)</strong></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% popular_route_paths.each do |route_path| %>
+            <tr>
+              <td></td>
+              <td><%= route_path.http_method%> <%= route_path.route %></td>
+              <td><%= route_path.statistic_all.http_requests_count %></td>
+              <td><%= route_path.statistic_all.avg_response_time %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <div class="row justify-content-md-center">
+    <div class="col-md-auto">
+      <form action=<%= pathy('/configuration?metrics=true&redirect_to=metrics')%> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Enable Metrics Monitoring</button>
+      </form>
+    </div>
+  </div>
+<% end %>

@@ -7,7 +7,11 @@ module Rack::Reqorder
     end
 
     def call(environment)
-      rack_request = Rack::Request.new(environment.clone)
+      rack_request = Rack::Request.new(
+        environment.clone.tap{|h|
+          h[Rack::RACK_INPUT] = StringIO.new(request_body(environment))
+        }
+      )
 
       http_request = record_request(rack_request) if conf.request_monitoring
 
@@ -28,6 +32,14 @@ module Rack::Reqorder
     end
 
   private
+    #StringIO behaves quite weirdly
+    def request_body(environment)
+      str = environment[Rack::RACK_INPUT].read.to_s
+      environment[Rack::RACK_INPUT] = StringIO.new(str)
+
+      return str
+    end
+
     def record_statistics(rack_request, rack_response, response_time)
       if rack_response && conf.metrics_monitoring
         save_statistics(
@@ -43,12 +55,14 @@ module Rack::Reqorder
       recording = nil
 
       Recording.enabled.all.each do |rec|
-        if request_headers[rec.http_header] == rec.http_header_value
+        if request_headers[rec.rack_http_header] == rec.http_header_value
           recording = rec and break
         end
       end
 
-      return save_http_request(rack_request, recording)
+      if recording
+        return save_http_request(rack_request, recording)
+      end
     end
 
     def record_response(rack_response, http_request)
@@ -126,6 +140,7 @@ module Rack::Reqorder
       HttpRequest.create({
         ip: rack_request.ip,
         url: rack_request.url,
+        body: rack_request.body.read.to_s,
         scheme: rack_request.scheme,
         base_url: rack_request.base_url,
         port: rack_request.port,

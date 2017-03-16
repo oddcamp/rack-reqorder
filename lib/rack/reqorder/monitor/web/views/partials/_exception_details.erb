@@ -1,0 +1,49 @@
+<table class="table table-bordered">
+  <tr>
+    <th> Exception Details </th>
+    <th>Message</th>
+    <td><%= exception.message %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Ocurred at</th>
+    <td><%= exception.created_at.utc %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Filepath</th>
+    <td><%= exception.filepath %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Line</th>
+    <td><%= exception.line %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Where it fails</th>
+    <td>
+      <pre class="pre-inline-block">
+        <code class="ruby"><%= pre_source_extract(exception.source_extract) %></code>
+      </pre>
+    </td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Application Trace</th>
+    <td><pre><%= format_trace(exception.application_trace) %></pre></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Full Trace</th>
+    <td><pre><%= format_trace(exception.full_trace) %></pre></td>
+  </tr>
+</table>
+
+<%= erb :'partials/_request_details', locals: {request: exception.http_request} %>

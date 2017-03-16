@@ -1,23 +1,17 @@
 # Rack::Reqorder
+Simple gem for monitoring Rack apps. Uses MongoDB underneath.
 
-Simple gem for monitoring Rack apps. Uses MongoDB. It can be used in combination
-with [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor).
+Intended to be used mostly on development and staging environments, mostly for APIs.
 
 ## Introduction
-Simple gem that sits on top of Rack and can:
+Simple gem that sits on top of Rack and:
 
 - monitors for exceptions and provides full details, like where it happened as well as the request details
-- record full requests/responses timelined, based on a header
-- record request/response statistics
+- records full requests/responses timelined, based on a header/header value
+- records request/response statistics
 
-It saves everything in MongoDB and exposes simple API for retrieving these data.
+Each functionality can be enabled/disabled by the embedded dashboard.
 
-The API is very robust, built with the help of [mongoid_hash_query](https://github.com/kollegorna/mongoid_hash_query).
-
-A simple, default, dashboard is build in ember can be found [here](https://github.com/kollegorna/rack-reqorder-monitor).
-
-At the moment, Rails, Sinatra and Grape are supported.
-We are looking forward to add support for Hanami (ex-Lotus).
 
 ## Installation
 
@@ -28,21 +22,25 @@ gem 'rack-reqorder'
 ```
 
 And then execute:
+```
+bundle install
+```
 
-    $ bundle
+**For Rails 5.x you need to add Sinatra 2.x in your Gemfile to use the dashboard**
 
-Or install it yourself as:
+```ruby
+  gem "sinatra", ">= 2.0.0.rc1"
+```
 
-    $ gem install rack-reqorder
 
 ## Usage
-You first need to initialize mongoid/mongodb by running:
+If you don't already have Mongoid in your app, you first need to initialize it by running:
 
 ```bash
 bundle exec rails g mongoid:config
 ```
 
-Then just add it on the middleware pipeline and initialize it.
+**Then** just add `rack-reqorder` in the middleware pipeline and initialize it.
 
 For instance, in Rails, in an initializer add:
 
@@ -58,10 +56,9 @@ Rails.application.config.middleware.insert_after(ActionDispatch::DebugExceptions
 #or if run on production
 #Rails.application.config.middleware.insert_after(0, Rack::Reqorder::Logger)
 ```
-Then in routes.rb enable the API for the [rack-reqorder-monitor](https://github.com/kollegorna/rack-reqorder-monitor).
+Then in routes.rb enable the little dashboard:
 ```ruby
-  require 'rack/reqorder/monitor'
-  mount Rack::Reqorder::Monitor::Api => '/rack-reqorder'
+  mount Rack::Reqorder::Monitor::Web::Application => '/rack-reqorder'
 ```
 
 ## Development

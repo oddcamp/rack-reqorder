@@ -1,4 +1,4 @@
-module Rack::Reqorder::Monitor
+module Rack::Reqorder::Monitor::Api
   module Entities
     class BaseEntity < Grape::Entity
       expose :_id, documentation: { type: 'String', desc: 'BSON::ObjectId String' }, :format_with => :to_string, as: :id
@@ -157,9 +157,7 @@ module Rack::Reqorder::Monitor
       expose :resolved
       expose :app_exceptions_count, as: :exceptions_count
       expose :environment
-      expose :message do |fault, options|
-        fault.app_exceptions.try(:last).try(:message)
-      end
+      expose :message
 
       expose :app_exception_ids, as: :exception_ids do |fault, options|
         fault.app_exception_ids.map(&:to_s).first(100)

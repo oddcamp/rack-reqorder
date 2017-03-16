@@ -1,7 +1,6 @@
 module Rack::Reqorder::Models
   class Statistic
     include ::Mongoid::Document
-    include ::Kaminari::MongoidExtension::Document
     include ::Mongoid::Timestamps
 
     field :http_requests_count, type: Integer, default: 0
