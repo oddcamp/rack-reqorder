@@ -1,7 +1,6 @@
 module Rack::Reqorder::Models
   class HttpResponse
     include ::Mongoid::Document
-    include ::Kaminari::MongoidExtension::Document
     include ::Mongoid::Timestamps
 
     field :headers, type: Hash
@@ -10,8 +9,8 @@ module Rack::Reqorder::Models
     field :length, type: Integer
     field :response_time, type: Float
 
-    belongs_to :http_request, dependent: :nullify
-    belongs_to :recording, dependent: :nullify
+    belongs_to :http_request, {dependent: :nullify}.merge(REQUIRED)
+    belongs_to :recording, {dependent: :nullify}.merge(REQUIRED)
 
     before_create :set_response_time
     after_create :set_response_time_to_request

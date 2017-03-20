@@ -1,0 +1,27 @@
+<div class="row justify-content-md-center">
+  <div class="col-md-auto">
+    <form action=<%= pathy("/recordings/#{recording.id}?redirect_to=#{redirect_to[:delete]}") %> method="POST">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+&nbsp;
+  <div class="col-md-auto">
+    <form action=<%= pathy("/recordings/#{recording.id}/requests?redirect_to=#{redirect_to[:clear]}") %> method="POST">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn btn-warning">Clear</button>
+    </form>
+
+  </div>
+&nbsp;
+  <div class="col-md-auto">
+    <form action=<%= pathy("/recordings/#{recording.id}/toggle?redirect_to=#{redirect_to[:clear]}") %> method="POST" class="float-right">
+      <input type="hidden" name="_method" value="PUT">
+      <% if recording.enabled %>
+        <button type="submit" class="btn btn-warning">Disable</button>
+      <% else %>
+        <button type="submit" class="btn btn-success">Enable</button>
+      <% end %>
+    </form>
+  </div>
+</div>

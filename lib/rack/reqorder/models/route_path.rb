@@ -1,7 +1,6 @@
 module Rack::Reqorder::Models
   class RoutePath
     include ::Mongoid::Document
-    include ::Kaminari::MongoidExtension::Document
     include ::Mongoid::Timestamps
 
     field :route, type: String

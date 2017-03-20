@@ -1,0 +1,8 @@
+<form action=<%= pathy("/errors/#{fault.id}/toggle?redirect_to=#{redirect_to}") %> method="POST" class="float-right">
+  <input type="hidden" name="_method" value="PUT">
+  <% if fault.resolved %>
+    <button type="submit" class="btn btn-warning">Unresolve</button>
+  <% else %>
+    <button type="submit" class="btn btn-success">Resolve</button>
+  <% end %>
+</form>

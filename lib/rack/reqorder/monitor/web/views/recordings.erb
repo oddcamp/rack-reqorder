@@ -1,0 +1,68 @@
+<% if request_monitoring %>
+  <div class="row">
+    <div class="col"></div>
+    <div class="col">
+      <form action=<%= pathy('/recordings') %> method="POST" class="form-inline float-center">
+        <label class="sr-only" for="inlineFormInput">Http Header</label>
+        <input type="text" name="recording[http_header]" class="form-control mb-2 mr-sm-2 mb-sm-0" placeholder="HTTP Header">
+
+        <label class="sr-only" for="inlineFormInput">Http Header Value</label>
+        <input type="text" name="recording[http_header_value]" class="form-control mb-2 mr-sm-2 mb-sm-0" placeholder="HTTP Header value">
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <div class="col"></div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+
+      <table class="table center-table">
+        <thead>
+          <tr>
+            <th><strong>Id</strong></th>
+            <th><strong>Http Header</strong></th>
+            <th><strong>Value</strong></th>
+            <th><strong>Enabled</strong></th>
+            <th><strong>Requests count</strong></th>
+            <th><strong>Actions</strong></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recordings.each do |recording| %>
+            <tr>
+              <td>
+                <a href=<%= pathy("recordings/#{recording.id}") %>><%= recording.id %></a>
+              </td>
+              <td><%= recording.http_header %></td>
+              <td><%= recording.http_header_value %></td>
+              <td>
+                <% if recording.enabled %>
+                  Enabled
+                <% else %>
+                  Disabled
+                <% end %>
+              </td>
+              <td><%= recording.requests_count %></td>
+              <td><%= erb :'partials/_recording_actions', locals: {recording: recording, redirect_to: {delete: :index, clear: :index}} %></td>
+            </tr>
+          <% end.empty? and begin %>
+            <tr>
+              <td colspan="5" class="no-errors">No recordings</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <div class="row justify-content-md-center">
+    <div class="col-md-auto">
+      <form action=<%= pathy('/configuration?request=true&redirect_to=recordings')%> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Enable Recordings Monitoring</button>
+      </form>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,59 @@
+<div class="row">
+  <div class="col">
+    <p class="text-center"> Your little dashboard</p>
+  </div>
+</div>
+
+<div class="row justify-content-md-center">
+  <div class="col-md-auto">
+    <% if exception_monitoring %>
+      <form action=<%= pathy('/configuration?exception=false') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-success">Exception Monitoring Enabled</button>
+      </form>
+    <% else %>
+      <form action=<%= pathy('/configuration?exception=true') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Exception Monitoring Enabled</button>
+      </form>
+    <% end %>
+  </div>
+&nbsp;
+  <div class="col-md-auto">
+    <% if request_monitoring %>
+      <form action=<%= pathy('/configuration?request=false') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-success">Recordings Monitoring Enabled</button>
+      </form>
+    <% else %>
+      <form action=<%= pathy('/configuration?request=true') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Recordings Monitoring Enabled</button>
+      </form>
+    <% end %>
+  </div>
+&nbsp;
+  <div class="col-md-auto">
+    <% if metrics_monitoring %>
+      <form action=<%= pathy('/configuration?metrics=false') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-success">Metrics Monitoring Enabled</button>
+      </form>
+    <% else %>
+      <form action=<%= pathy('/configuration?metrics=true') %> method="POST">
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-warning">Metrics Monitoring Enabled</button>
+      </form>
+    <% end %>
+  </div>
+</div>
+<br>
+
+<div class="row justify-content-md-center">
+  <div class="col-md-auto">
+      <form action=<%= pathy('/data') %> method="POST">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit" class="btn btn-danger">Delete all data</button>
+      </form>
+  </div>
+</div>

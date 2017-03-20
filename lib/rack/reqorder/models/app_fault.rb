@@ -1,7 +1,6 @@
 module Rack::Reqorder::Models
   class AppFault
     include ::Mongoid::Document
-    include ::Kaminari::MongoidExtension::Document
     include ::Mongoid::Timestamps
 
     field :e_class, type: String
@@ -22,6 +21,10 @@ module Rack::Reqorder::Models
       self.app_exceptions_count = self.app_exceptions.count
       self.last_seen_at = DateTime.now
       self.save!
+    end
+
+    def message
+      app_exceptions.try(:last).try(:message)
     end
 
   end

@@ -1,0 +1,51 @@
+<table class="table table-bordered">
+  <tr>
+    <th> Request Details </th>
+    <th>Url</th>
+    <td><%= request.http_method %> <%= request.url %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>Headers</th>
+    <td>
+      <table>
+        <% request.headers.each do |header, value| %>
+          <tr>
+            <th><%= header %></th>
+            <td><%= value %></td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+
+  <% if request.has_body? %>
+    <tr>
+      <th></th>
+      <th>Body</th>
+      <td><pre><%= request.body %></pre></td>
+    </tr>
+  <% end %>
+
+  <tr>
+    <th></th>
+    <th>Xhr?</th>
+    <td><%= request.xhr %></td>
+  </tr>
+
+  <tr>
+    <th></th>
+    <th>IP</th>
+    <td><%= request.ip %></td>
+  </tr>
+
+  <% if request.route_path %>
+    <tr>
+      <th></th>
+      <th>Route path</th>
+      <td><%= request.route_path.http_method %> <%= request.route_path.route %></td>
+    </tr>
+  <% end %>
+
+</table>

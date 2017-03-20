@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col">
+    <% if previous_exception %>
+      <a href=<%= previous_exception.path %> role="button" class="btn btn-secondary float-left"> Previous exception of this type </a>
+    <% end %>
+    <% if next_exception %>
+      <a href=<%= next_exception.path %> role="button" class="btn btn-secondary float-right"> Next exception of this type </a>
+    <% end %>
+    <% if previous_exception || next_exception %>
+      <br><br><br>
+    <% end %>
+
+    <%= erb :'partials/_fault_actions', locals: {fault: fault, redirect_to: :resource} %>
+
+    <%= erb :'partials/_exception_details', locals: {exception: exception} %>
+  </div>
+</div>

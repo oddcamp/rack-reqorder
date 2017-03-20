@@ -1,4 +1,4 @@
-module Rack::Reqorder::Monitor
+module Rack::Reqorder::Monitor::Api
   module Helpers
     def authorize_user!(headers)
       authorize_user(headers) ? true : error!('403 Forbidden', 403)
